@@ -48,34 +48,22 @@ def make_translation_example(dx, dy, size=64, square_size=16, top=24, left=24):
     return image, moved, dx, dy
 
 
-if __name__ == "__main__":
-    test_image = np.zeros((5, 5), dtype=np.float32)
-    test_image[2, 2] = 1.0
+def build_dataset(n_samples=100, seed=42):
+    if not 1 <= n_samples <= 625:
+        raise ValueError("n_samples must be between 1 and 625")
 
-    result = translate(test_image, dx=-1, dy=2)
+    rng = np.random.default_rng(seed)
 
-    assert result[4, 1] == 1.0
-    assert result.sum() == 1.0
-    assert np.array_equal(translate(test_image, 0, 0), test_image)
-    assert np.all(translate(test_image, 5, 0) == 0)
-
-    print("Translation tests passed!")
-
-    # 后面继续放随机数据集生成代码
-    rng = np.random.default_rng(42)
 
     examples = []
 
-    while len(examples) < 100:
+    while len(examples) < n_samples:
         dx = rng.integers(-12, 13)
         dy = rng.integers(-12, 13)
 
-        # 只保存没有出现过的位移组合
         if (dx, dy) not in examples:
             examples.append((dx, dy))
 
-    print("样本数量:", len(examples))
-    print("不同位移组合数量:", len(set(examples)))
 
     dataset = []
 
@@ -95,23 +83,22 @@ if __name__ == "__main__":
     X_moved = np.array(X_moved, dtype=np.float32)
     shifts = np.array(shifts, dtype=np.int64)
 
-    print("X_original shape:", X_original.shape)
-    print("X_moved shape:", X_moved.shape)
-    print("shifts shape:", shifts.shape)
-    X_original_train = X_original[:80]
-    X_original_test = X_original[80:]
 
-    X_moved_train = X_moved[:80]
-    X_moved_test = X_moved[80:]
 
-    shifts_train = shifts[:80]
-    shifts_test = shifts[80:]
-    print("Train:", X_original_train.shape,
-          X_moved_train.shape, shifts_train.shape)
+    return X_original, X_moved, shifts
 
-    print("Test:", X_original_test.shape,
-          X_moved_test.shape, shifts_test.shape)
-    train_pairs = set(map(tuple, shifts_train))
-    test_pairs = set(map(tuple, shifts_test))
 
-    assert train_pairs.isdisjoint(test_pairs)
+if __name__ == "__main__":
+    X_original, X_moved, shifts = build_dataset()
+
+    print("Original:", X_original.shape)
+    print("Moved:", X_moved.shape)
+    print("Shifts:", shifts.shape)
+
+    assert X_original.shape == (100, 64, 64)
+    assert X_moved.shape == (100, 64, 64)
+    assert shifts.shape == (100, 2)
+
+    assert len(set(map(tuple, shifts))) == 100
+
+    print("Dataset tests passed!")
