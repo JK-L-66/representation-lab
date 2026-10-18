@@ -23,10 +23,13 @@ Positive `dx` moves an image right; positive `dy` moves it down.
 
 The same CNN encoder processes the original image and its translated version. Its output is a 32-dimensional latent vector, and a linear head predicts the two translation coordinates from the difference:
 
-\[
- z_o = f_\theta(x), \qquad z_m = f_\theta(T_g x), \qquad
- \hat g = W(z_m-z_o)+b.
-\]
+
+$$
+z_o = f_\theta(x), \qquad
+z_m = f_\theta(T_g x), \qquad
+\hat{g} = W(z_m-z_o)+b
+$$
+
 
 The encoder uses two convolutional layers with ReLU, adaptive average pooling to an 8 × 8 grid, and a fully connected projection to 32 dimensions. Training uses MSE loss and Adam for five epochs. The encoder weights are shared across both image inputs.
 
@@ -36,9 +39,9 @@ This architecture can *read out* translation information from latent differences
 
 For images without foreground cropping, the centroid of translated foreground pixels shifts by exactly the translation vector. The baseline therefore predicts
 
-\[
- \hat g_{\mathrm{centroid}} = c(T_gx)-c(x),
-\]
+$$
+\hat{g}_{\mathrm{centroid}} = c(T_g x)-c(x)
+$$
 
 where `c` is the foreground-pixel centroid. It requires neither training nor an object-specific model. The baseline's exact result depends on the current controlled setup and should not be generalized to images with cropping, noise, or ambiguous foregrounds.
 
@@ -53,9 +56,9 @@ All MSE values average squared errors over *both* displacement coordinates, in p
 
 The CNN performs well on held-out examples from the square training distribution, but it loses accuracy when evaluated on circles without retraining. On the circle test, predictions tend to have a smaller magnitude than the true displacement. The pooled scale through the origin,
 
-\[
+$$
  s = \frac{\sum_i \hat g_i \cdot g_i}{\sum_i \lVert g_i \rVert^2},
-\]
+$$
 
 is approximately **0.768967** (descriptive, not a fitted correction used at inference time).
 
@@ -75,9 +78,9 @@ A perfect predictor would fall on the `prediction = target` diagonal. The CNN's 
 
 For each of 20 square starting positions, we computed
 
-\[
+$$
  \Delta z_i(g) = f_\theta(T_g x_i) - f_\theta(x_i).
-\]
+$$
 
 For each fixed translation, the **within-shift distance** is the mean Euclidean distance from its group's mean latent difference. The **between-shift distance** is the Euclidean distance between the two group means.
 
